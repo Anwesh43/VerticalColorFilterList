@@ -8,17 +8,25 @@ import android.graphics.Bitmap;
  */
 public class VerticalColorFilterList {
     private Activity activity;
+    private VerticalColorFilterListView view;
     private boolean isShown = false;
+    int colorAdded = 0;
     public VerticalColorFilterList(Activity activity, Bitmap bitmap) {
         this.activity = activity;
+        this.view = new VerticalColorFilterListView(activity,bitmap);
     }
     public void addColor(int color) {
         if(isShown) {
-
+            view.addColor(color);
+            if(colorAdded == 0) {
+                view.postInvalidate();
+            }
+            colorAdded++;
         }
     }
     public void show() {
         if(!isShown) {
+            activity.setContentView(view);
             isShown = true;
         }
     }
