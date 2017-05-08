@@ -6,6 +6,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.RectF;
+import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
 import java.util.*;
@@ -18,9 +19,11 @@ public class VerticalColorFilterListView extends View {
     private Screen screen;
     private List<ColorFilterRect> colorFilterRects = new ArrayList<>();
     private Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private GestureDetector gestureDetector;
     public VerticalColorFilterListView(Context context, Bitmap bitmap) {
         super(context);
         this.bitmap = bitmap;
+        gestureDetector = new GestureDetector(context,new ScreenGestureDetector());
     }
     public void addColor(int color) {
         colorFilterRects.add(new ColorFilterRect(colorFilterRects.size()*h,color));
@@ -42,7 +45,7 @@ public class VerticalColorFilterListView extends View {
         time++;
     }
     public boolean onTouchEvent(MotionEvent event) {
-        return true;
+        return gestureDetector.onTouchEvent(event);
     }
     private class Screen {
         private float y = 0,dir=0;
@@ -72,6 +75,23 @@ public class VerticalColorFilterListView extends View {
         }
         public int hashCode() {
             return color+(int)y;
+        }
+    }
+    private class ScreenGestureDetector extends GestureDetector.SimpleOnGestureListener {
+        public boolean onDown(MotionEvent event) {
+            return true;
+        }
+        public boolean onSingleTapUp(MotionEvent event) {
+            return true;
+        }
+        public boolean onFling(MotionEvent e1,MotionEvent e2,float velx,float vely) {
+            if(vely > velx && e1.getY()!=e2.getY()) {
+                float dir = (e2.getY()-e1.getY())/Math.abs(e2.getY()-e1.getY());
+                if((dir == -1 && screen.y >= -h*(colorFilterRects.size()-1)) || (dir==1 && screen.y <= 0)) {
+                    screen.setDir(dir);
+                }
+            }
+            return true;
         }
     }
 }
