@@ -12,7 +12,7 @@ import android.view.View;
  */
 public class VerticalColorFilterListView extends View {
     private Bitmap bitmap;
-    private int time = 0;
+    private int time = 0,w,h;
     private Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
     public VerticalColorFilterListView(Context context, Bitmap bitmap) {
         super(context);
@@ -22,7 +22,8 @@ public class VerticalColorFilterListView extends View {
 
     }
     public void onDraw(Canvas canvas) {
-        int w = canvas.getWidth(),h = canvas.getHeight();
+        w = canvas.getWidth();
+        h = canvas.getHeight();
         if(time == 0) {
             bitmap = Bitmap.createScaledBitmap(bitmap,w,h,true);
         }
@@ -31,5 +32,17 @@ public class VerticalColorFilterListView extends View {
     }
     public boolean onTouchEvent(MotionEvent event) {
         return true;
+    }
+    private class Screen {
+        private float y = 0,dir=0;
+        public void updateY(float factor) {
+            y+=h*factor*dir;
+        }
+        public void setDir(float dir) {
+            this.dir = dir;
+        }
+        public float getY() {
+            return y;
+        }
     }
 }
