@@ -8,28 +8,37 @@ import android.graphics.Paint;
 import android.graphics.RectF;
 import android.view.MotionEvent;
 import android.view.View;
-
+import java.util.*;
 /**
  * Created by anweshmishra on 08/05/17.
  */
 public class VerticalColorFilterListView extends View {
     private Bitmap bitmap;
     private int time = 0,w,h;
+    private Screen screen;
+    private List<ColorFilterRect> colorFilterRects = new ArrayList<>();
     private Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
     public VerticalColorFilterListView(Context context, Bitmap bitmap) {
         super(context);
         this.bitmap = bitmap;
     }
     public void addColor(int color) {
-
+        colorFilterRects.add(new ColorFilterRect(colorFilterRects.size()*h,color));
     }
     public void onDraw(Canvas canvas) {
         w = canvas.getWidth();
         h = canvas.getHeight();
         if(time == 0) {
             bitmap = Bitmap.createScaledBitmap(bitmap,w,h,true);
+            screen = new Screen();
         }
         canvas.drawBitmap(bitmap,0,0,paint);
+        canvas.save();
+        canvas.translate(0,screen.getY());
+        for(ColorFilterRect rect:colorFilterRects) {
+            rect.draw(canvas,paint);
+        }
+        canvas.restore();
         time++;
     }
     public boolean onTouchEvent(MotionEvent event) {
