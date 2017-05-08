@@ -13,7 +13,7 @@ public class VerticalColorFilterList {
         this.activity = activity;
     }
     public void addColor(int color) {
-        if(!isShown) {
+        if(isShown) {
 
         }
     }
