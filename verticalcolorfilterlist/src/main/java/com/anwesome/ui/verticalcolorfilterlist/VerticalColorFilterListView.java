@@ -3,7 +3,9 @@ package com.anwesome.ui.verticalcolorfilterlist;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.RectF;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -43,6 +45,24 @@ public class VerticalColorFilterListView extends View {
         }
         public float getY() {
             return y;
+        }
+    }
+    private class ColorFilterRect {
+        private float y;
+        private int color;
+        public ColorFilterRect(float y,int color) {
+            this.y = y;
+            this.color = color;
+        }
+        public void draw(Canvas canvas,Paint paint) {
+            paint.setColor(Color.argb(150,Color.red(color),Color.green(color),Color.blue(color)));
+            canvas.save();
+            canvas.translate(0,y);
+            canvas.drawRect(new RectF(0,0,w,h),paint);
+            canvas.restore();
+        }
+        public int hashCode() {
+            return color+(int)y;
         }
     }
 }
