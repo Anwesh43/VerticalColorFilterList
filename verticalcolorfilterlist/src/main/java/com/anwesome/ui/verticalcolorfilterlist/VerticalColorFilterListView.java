@@ -9,6 +9,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.RectF;
+import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
@@ -62,12 +63,21 @@ public class VerticalColorFilterListView extends View {
         return gestureDetector.onTouchEvent(event);
     }
     private class Screen {
-        private float y = 0,dir=0;
+        private float y = 0,dir=0,initY;
+        public Screen() {
+            initY = y;
+        }
         public void updateY(float factor) {
-            y+=h*factor*dir;
+            float yDisp = h*factor*dir;
+            Log.d("yDisp",""+yDisp);
+            y=initY+yDisp;
         }
         public void setDir(float dir) {
             this.dir = dir;
+            if(dir == 0) {
+                initY = y;
+            }
+
         }
         public float getY() {
             return y;
@@ -110,9 +120,9 @@ public class VerticalColorFilterListView extends View {
                 float dir = (e2.getY()-e1.getY())/Math.abs(e2.getY()-e1.getY());
                 if((dir == -1 && screen.y > -h*(colorFilterRects.size()-1)) || (dir==1 && screen.y < 0)) {
                     screen.setDir(dir);
-                    screen.y += dir*h;
-                    postInvalidate();
-                    //animationHandler.start();
+                    //screen.y += dir*h;
+                    //postInvalidate();
+                    animationHandler.start();
                 }
             }
             return true;
