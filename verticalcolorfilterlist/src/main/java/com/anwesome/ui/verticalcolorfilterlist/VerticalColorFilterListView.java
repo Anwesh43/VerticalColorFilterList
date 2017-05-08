@@ -19,7 +19,7 @@ import java.util.*;
  */
 public class VerticalColorFilterListView extends View {
     private Bitmap bitmap;
-    private int time = 0,w,h;
+    private int time = 0,w,h,barH;
     private AnimationHandler animationHandler;
     private Screen screen;
     private List<ColorFilterRect> colorFilterRects = new ArrayList<>();
@@ -34,9 +34,10 @@ public class VerticalColorFilterListView extends View {
         colorFilterRects.add(new ColorFilterRect(color));
     }
     public void onDraw(Canvas canvas) {
-        w = canvas.getWidth();
-        h = canvas.getHeight();
         if(time == 0) {
+            w = canvas.getWidth();
+            h = 9*canvas.getHeight()/10;
+            barH = canvas.getHeight()/10;
             bitmap = Bitmap.createScaledBitmap(bitmap,w,h,true);
             screen = new Screen();
             animationHandler = new AnimationHandler();
@@ -46,6 +47,8 @@ public class VerticalColorFilterListView extends View {
                 i++;
             }
         }
+        canvas.save();
+        canvas.translate(0,barH);
         canvas.drawBitmap(bitmap,0,0,paint);
         canvas.save();
         canvas.translate(0,screen.getY());
@@ -53,6 +56,11 @@ public class VerticalColorFilterListView extends View {
             rect.draw(canvas,paint);
         }
         canvas.restore();
+        canvas.restore();
+        paint.setColor(Color.WHITE);
+        canvas.drawRect(new RectF(0,0,w,barH),paint);
+        paint.setColor(Color.parseColor("#FF6F00"));
+        canvas.drawArc(new RectF(w/2-h/20,0,w/2+h/20,h/10),0,Math.abs(360*((screen.y)/(h*(colorFilterRects.size()-1)))),true,paint);
         time++;
     }
     public void update(float factor) {
@@ -116,7 +124,7 @@ public class VerticalColorFilterListView extends View {
 //            return true;
 //        }
         public boolean onFling(MotionEvent e1,MotionEvent e2,float velx,float vely) {
-            if(Math.abs(vely) > Math.abs(velx) && e1.getY()!=e2.getY()) {
+            if(Math.abs(vely) > Math.abs(velx) && e1.getY()!=e2.getY() && screen.dir == 0) {
                 float dir = (e2.getY()-e1.getY())/Math.abs(e2.getY()-e1.getY());
                 if((dir == -1 && screen.y > -h*(colorFilterRects.size()-1)) || (dir==1 && screen.y < 0)) {
                     screen.setDir(dir);
