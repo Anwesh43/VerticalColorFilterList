@@ -1,5 +1,7 @@
 package com.anwesome.ui.verticalcolorfilterlist;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -28,7 +30,7 @@ public class VerticalColorFilterListView extends View {
         gestureDetector = new GestureDetector(context,new ScreenGestureDetector());
     }
     public void addColor(int color) {
-        colorFilterRects.add(new ColorFilterRect(colorFilterRects.size()*h,color));
+        colorFilterRects.add(new ColorFilterRect(color));
     }
     public void onDraw(Canvas canvas) {
         w = canvas.getWidth();
@@ -37,6 +39,11 @@ public class VerticalColorFilterListView extends View {
             bitmap = Bitmap.createScaledBitmap(bitmap,w,h,true);
             screen = new Screen();
             animationHandler = new AnimationHandler();
+            int i = 0;
+            for(ColorFilterRect colorFilterRect:colorFilterRects) {
+                colorFilterRect.setY(h*i);
+                i++;
+            }
         }
         canvas.drawBitmap(bitmap,0,0,paint);
         canvas.save();
@@ -69,8 +76,10 @@ public class VerticalColorFilterListView extends View {
     private class ColorFilterRect {
         private float y;
         private int color;
-        public ColorFilterRect(float y,int color) {
+        public void setY(float y) {
             this.y = y;
+        }
+        public ColorFilterRect(int color) {
             this.color = color;
         }
         public void draw(Canvas canvas,Paint paint) {
@@ -91,22 +100,33 @@ public class VerticalColorFilterListView extends View {
         public boolean onSingleTapUp(MotionEvent event) {
             return true;
         }
+//        public boolean onScroll(MotionEvent e1,MotionEvent e2,float velx,float vely) {
+//            screen.y += e2.getY()-e1.getY();
+//            postInvalidate();
+//            return true;
+//        }
         public boolean onFling(MotionEvent e1,MotionEvent e2,float velx,float vely) {
-            if(vely > velx && e1.getY()!=e2.getY()) {
+            if(Math.abs(vely) > Math.abs(velx) && e1.getY()!=e2.getY()) {
                 float dir = (e2.getY()-e1.getY())/Math.abs(e2.getY()-e1.getY());
-                if((dir == -1 && screen.y >= -h*(colorFilterRects.size()-1)) || (dir==1 && screen.y <= 0)) {
-                    animationHandler.start();
+                if((dir == -1 && screen.y > -h*(colorFilterRects.size()-1)) || (dir==1 && screen.y < 0)) {
                     screen.setDir(dir);
+                    screen.y += dir*h;
+                    postInvalidate();
+                    //animationHandler.start();
                 }
             }
             return true;
         }
     }
-    private class AnimationHandler implements ValueAnimator.AnimatorUpdateListener{
+    private class AnimationHandler extends AnimatorListenerAdapter implements ValueAnimator.AnimatorUpdateListener{
         private ValueAnimator valueAnimator = ValueAnimator.ofFloat(0,1);
         public AnimationHandler() {
             valueAnimator.setDuration(500);
             valueAnimator.addUpdateListener(this);
+            valueAnimator.addListener(this);
+        }
+        public void onAnimationEnd(Animator animator) {
+            screen.setDir(0);
         }
         public void onAnimationUpdate(ValueAnimator valueAnimator) {
             update((float)(valueAnimator.getAnimatedValue()));

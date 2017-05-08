@@ -16,12 +16,8 @@ public class VerticalColorFilterList {
         this.view = new VerticalColorFilterListView(activity,bitmap);
     }
     public void addColor(int color) {
-        if(isShown) {
+        if(!isShown) {
             view.addColor(color);
-            if(colorAdded == 0) {
-                view.postInvalidate();
-            }
-            colorAdded++;
         }
     }
     public void show() {
