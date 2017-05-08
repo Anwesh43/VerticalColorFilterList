@@ -1,5 +1,6 @@
 package com.anwesome.ui.verticalcolorfilterlist;
 
+import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -16,6 +17,7 @@ import java.util.*;
 public class VerticalColorFilterListView extends View {
     private Bitmap bitmap;
     private int time = 0,w,h;
+    private AnimationHandler animationHandler;
     private Screen screen;
     private List<ColorFilterRect> colorFilterRects = new ArrayList<>();
     private Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -34,6 +36,7 @@ public class VerticalColorFilterListView extends View {
         if(time == 0) {
             bitmap = Bitmap.createScaledBitmap(bitmap,w,h,true);
             screen = new Screen();
+            animationHandler = new AnimationHandler();
         }
         canvas.drawBitmap(bitmap,0,0,paint);
         canvas.save();
@@ -43,6 +46,10 @@ public class VerticalColorFilterListView extends View {
         }
         canvas.restore();
         time++;
+    }
+    public void update(float factor) {
+        screen.updateY(factor);
+        postInvalidate();
     }
     public boolean onTouchEvent(MotionEvent event) {
         return gestureDetector.onTouchEvent(event);
@@ -88,10 +95,24 @@ public class VerticalColorFilterListView extends View {
             if(vely > velx && e1.getY()!=e2.getY()) {
                 float dir = (e2.getY()-e1.getY())/Math.abs(e2.getY()-e1.getY());
                 if((dir == -1 && screen.y >= -h*(colorFilterRects.size()-1)) || (dir==1 && screen.y <= 0)) {
+                    animationHandler.start();
                     screen.setDir(dir);
                 }
             }
             return true;
+        }
+    }
+    private class AnimationHandler implements ValueAnimator.AnimatorUpdateListener{
+        private ValueAnimator valueAnimator = ValueAnimator.ofFloat(0,1);
+        public AnimationHandler() {
+            valueAnimator.setDuration(500);
+            valueAnimator.addUpdateListener(this);
+        }
+        public void onAnimationUpdate(ValueAnimator valueAnimator) {
+            update((float)(valueAnimator.getAnimatedValue()));
+        }
+        public void start() {
+            valueAnimator.start();
         }
     }
 }
